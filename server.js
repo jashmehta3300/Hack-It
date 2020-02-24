@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
 
 //Route files
 const hackathons = require('./routes/hackathons');
@@ -8,6 +9,13 @@ const hackathons = require('./routes/hackathons');
 dotenv.config({ path: './config/config.env' });
 
 const app = express();
+
+//Dev middleware Morgan
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+} else {
+    console.log(`${process.env.NODE_ENV} mode running.`);
+}
 
 //Mount routers
 app.use('/api/v1/hackathons', hackathons);
