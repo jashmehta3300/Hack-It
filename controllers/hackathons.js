@@ -8,6 +8,7 @@ exports.getHackathons = async(req, res, next) => {
         const hackathons = await Hackathon.find();
         res.status(200).json({
             success: true,
+            count: hackathons.length,
             data: hackathons
         });
     } catch (err) {
@@ -25,6 +26,12 @@ exports.getHackathons = async(req, res, next) => {
 exports.getHackathon = async(req, res, next) => {
     try {
         const hackathonById = await Hackathon.findById(req.params.id);
+
+        if (!hackathonById) {
+            return res.status(400).json({
+                success: false
+            });
+        }
         res.status(200).json({
             success: true,
             data: hackathonById
@@ -64,17 +71,59 @@ exports.createHackathons = async(req, res, next) => {
 // @desc       Update a particular hackathon
 // @route      PUT /api/v1/hackathons/:id
 // @access     public
-exports.updateHackathon = (req, res, next) => {
-    res
-        .status(200)
-        .json({ success: true, msg: `update hackathon ${req.params.id}` });
+exports.updateHackathon = async(req, res, next) => {
+    try {
+        const hackathon = await Hackathon.findByIdAndUpdate(
+            req.params.id,
+            req.body, {
+                new: true,
+                runValidators: true //Mongoose validators
+            }
+        );
+        if (!hackathon) {
+            return res.status(400).json({
+                success: false
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: hackathon
+        });
+    } catch (err) {
+        console.log(err.message.red.underline);
+        res.status(400).json({
+            success: false
+        });
+    }
+
+    // res
+    //     .status(200)
+    //     .json({ success: true, msg: `update hackathon ${req.params.id}` });
 };
 
 // @desc       Delete a particular hackathon
 // @route      DELETE /api/v1/hackathons/:id
 // @access     public
-exports.deleteHackathon = (req, res, next) => {
-    res
-        .status(200)
-        .json({ success: true, msg: `delete hackathon ${req.params.id}` });
+exports.deleteHackathon = async(req, res, next) => {
+    try {
+        const hackathon = await Hackathon.findByIdAndDelete(req.params.id);
+        if (!hackathon) {
+            res.status(400).json({
+                success: false
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: {}
+        });
+    } catch (err) {
+        console.log(err.message.red.underline);
+        res.status(400).json({
+            success: false
+        });
+    }
+
+    // res
+    //     .status(200)
+    //     .json({ success: true, msg: `delete hackathon ${req.params.id}` });
 };
