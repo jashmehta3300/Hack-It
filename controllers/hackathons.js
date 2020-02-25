@@ -1,4 +1,5 @@
 const Hackathon = require('../models/Hackathon');
+const asyncHandler = require('../middleware/async');
 
 // @desc       Show all hackathons
 // @route      GET /api/v1/hackathons
