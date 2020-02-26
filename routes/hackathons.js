@@ -5,8 +5,11 @@ const {
     getHackathon,
     createHackathons,
     updateHackathon,
-    deleteHackathon
+    deleteHackathon,
+    getHackathonsInRadius
 } = require('../controllers/hackathons');
+
+router.route('/radius/:zipcode/:distance').get(getHackathonsInRadius);
 
 router
     .route('/')

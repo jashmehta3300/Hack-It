@@ -1,5 +1,6 @@
 const Hackathon = require('../models/Hackathon');
 const asyncHandler = require('../middleware/async');
+const geocoder = require('../utils/geocoder');
 
 // @desc       Show all hackathons
 // @route      GET /api/v1/hackathons
@@ -127,4 +128,33 @@ exports.deleteHackathon = async(req, res, next) => {
     // res
     //     .status(200)
     //     .json({ success: true, msg: `delete hackathon ${req.params.id}` });
+};
+
+// @desc      Get hackathon within a radius
+// @route     GET /api/v1/hackathon/radius/:zipcode/:distance
+// @access    Private
+exports.getHackathonsInRadius = async(req, res, next) => {
+    const { zipcode, distance } = req.params;
+
+    // Get lat/lng from geocoder
+    const loc = await geocoder.geocode(zipcode);
+    const lat = loc[0].latitude;
+    const lng = loc[0].longitude;
+
+    // Calc radius using radians
+    // Divide dist by radius of Earth
+    // Earth Radius = 3,963 mi / 6,378 km
+    const radius = distance / 3963;
+
+    const hackathons = await Hackathon.find({
+        location: { $geoWithin: { $centerSphere: [
+                    [lng, lat], radius
+                ] } }
+    });
+
+    res.status(200).json({
+        success: true,
+        count: hackathons.length,
+        data: hackathons
+    });
 };
