@@ -7,10 +7,57 @@ const geocoder = require('../utils/geocoder');
 // @access     public
 exports.getHackathons = async(req, res, next) => {
     try {
-        const hackathons = await Hackathon.find();
+        //inintialize var
+        let query;
+
+        //Copy queries in a var by using spread operator
+        const reqQuery = {...req.query };
+
+        //Field to exclude
+        const removeFields = ['page', 'limit'];
+
+        //Loop over remoreFiends and remove them from queries
+        removeFields.forEach(param => delete reqQuery[param]);
+
+        //Create query string
+        let queryStr = JSON.stringify(reqQuery);
+
+        //Finding resourse
+        query = Hackathon.find(JSON.parse(queryStr));
+
+        //
+        //Pagination
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 25;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const total = await Hackathon.countDocuments();
+
+        query = query.skip(startIndex).limit(limit);
+
+        //Executing query
+        const hackathons = await query;
+
+        //Pagination
+        const pagination = {};
+
+        if (endIndex < total) {
+            pagination.next = {
+                page: page + 1,
+                limit
+            };
+        }
+        if (startIndex > 0) {
+            pagination.prev = {
+                page: page - 1,
+                limit
+            };
+        }
+
         res.status(200).json({
             success: true,
             count: hackathons.length,
+            pagination: pagination,
             data: hackathons
         });
     } catch (err) {
