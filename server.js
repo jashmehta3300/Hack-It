@@ -12,6 +12,7 @@ connectDB();
 
 //Route files
 const hackathons = require('./routes/hackathons');
+const auth = require('./routes/auth');
 
 const app = express();
 
@@ -27,6 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 
 //Mount routers
 app.use('/api/v1/hackathons', hackathons);
+app.use('/api/v1/auth', auth);
 
 //access env vars
 const PORT = process.env.PORT || 5000;
